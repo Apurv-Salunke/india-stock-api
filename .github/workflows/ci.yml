@@ -1,51 +1,55 @@
 name: CI Workflow
 
+permissions:
+  contents: read
+  pull-requests: write
+
 on:
   push:
     branches:
       - main
     paths:
-      - '**.py'
+      - "**.py"
   pull_request:
     branches:
       - main
     paths:
-      - '**.py'
+      - "**.py"
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -r requirements-dev.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
 
-    - name: Run ruff
-      run: |
-        ruff check .
+      - name: Run ruff
+        run: |
+          ruff check .
 
-    - name: Run tests
-      run: |
-        pytest --maxfail=1 --disable-warnings -q
+      - name: Run tests
+        run: |
+          pytest --maxfail=1 --disable-warnings -q
 
-    - name: Build coverage file
-      run: >
-        pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered
-        --cov=app app/tests/ | tee pytest-coverage.txt
+      - name: Build coverage file
+        run: >
+          pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered
+          --cov=core tests/ | tee pytest-coverage.txt
 
-    - name: Pytest coverage comment
-      uses: MishaKav/pytest-coverage-comment@main
-      with:
-        pytest-coverage-path: ./pytest-coverage.txt
-        junitxml-path: ./pytest.xml
+      - name: Pytest coverage comment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-coverage-path: ./pytest-coverage.txt
+          junitxml-path: ./pytest.xml
